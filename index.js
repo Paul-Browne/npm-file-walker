@@ -1,6 +1,8 @@
 const fs = require("fs");
 const path = require("path");
 
+const timestamp = fs.statSync(__filename).mtimeMs;
+
 const fileWalker = obj => {
     const _path = obj.entry;
     const details = fs.statSync(_path);
@@ -31,11 +33,14 @@ const fileWalker = obj => {
         obj.onFile && obj.onFile({
             stats: details,
             path: _path,
-            contents: obj.readFiles && fs.readFileSync(_path)
+            contents: obj.readFiles && fs.readFileSync(_path),
+            modified: (details.mtimeMs > timestamp || details.ctimeMs > timestamp)
         });
     }
 }
 
 module.exports = obj => {
+    const self = fs.readFileSync(__filename);
+    fs.writeFileSync(__filename, self);
     return fileWalker(obj);
 }

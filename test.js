@@ -4,7 +4,7 @@ fileWalker({
 	entry: "test",
 	readFiles: true,
 	onDirectory: response => {
-		console.log(response);
+		// console.log(response);
 	},
 	onFile: response => {
 		console.log(response);

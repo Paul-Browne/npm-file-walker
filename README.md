@@ -14,14 +14,14 @@ or
 const fileWalker = require("recursive-file-walker");
 
 fileWalker({
-	entry: "path/to/start/directory",
-	readFiles: true,					// fs.readFileSync the files. default: false
-	onDirectory: response => {
-		console.log(response);			// callback when directory, object passed with directory details 
-	},
-	onFile: response => {
-		console.log(response);			// callback when file, object passed with file details
-	}									// will inc. contents if readFile: true
+  entry: "path/to/start/directory",
+  readFiles: true,          // fs.readFileSync the files. default: false
+  onDirectory: response => {
+    console.log(response);      // callback when directory, object passed with directory details 
+  },
+  onFile: response => {
+    console.log(response);      // callback when file, object passed with file details
+  }                             // will inc. contents if readFile: true
 });
 ```
 
@@ -86,7 +86,8 @@ example response for directory
 ```
 
 
-example response for a file. `contents` will be undefined if `readFile: false`
+example response for a file. `contents` will be undefined if `readFile: false`.
+`modified` will be `true` if the contents have changed, or if the file was created since the last walk (since the last time the function was called)
 
 ```js
 {
@@ -111,6 +112,7 @@ example response for a file. `contents` will be undefined if `readFile: false`
     birthtime: 2021-02-15T23:18:48.666Z
   },
   path: 'test/index.txt',
-  contents: <Buffer 4c 6f 72 65 6d 20 69 70 73 75 6d 20 64 6f 6c 6f 72 20 73 69 74 20 61 6d 65 74 2c 20 63 6f 6e 73 65 63 74 65 74 75 72 20 61 64 69 70 69 73 69 63 69 6e ... 4214650 more bytes>
+  contents: <Buffer 4c 6f 72 65 6d 20 69 70 73 75 6d 20 64 6f 6c 6f 72 20 73 69 74 20 61 6d 65 74 2c 20 63 6f 6e 73 65 63 74 65 74 75 72 20 61 64 69 70 69 73 69 63 69 6e ... 4214650 more bytes>,
+  modified: true
 }
 ```

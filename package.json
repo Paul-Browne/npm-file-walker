@@ -11,7 +11,7 @@
     "!/test",
     "!/.git",
     "!test.js"
-  ],  
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Paul-Browne/npm-file-walker.git"
@@ -21,5 +21,8 @@
   "bugs": {
     "url": "https://github.com/Paul-Browne/npm-file-walker/issues"
   },
-  "homepage": "https://github.com/Paul-Browne/npm-file-walker#readme"
+  "homepage": "https://github.com/Paul-Browne/npm-file-walker#readme",
+  "dependencies": {
+    "stamptime": "^1.0.3"
+  }
 }

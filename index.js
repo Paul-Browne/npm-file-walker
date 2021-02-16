@@ -1,7 +1,8 @@
 const fs = require("fs");
 const path = require("path");
+const stamp = require("stamptime");
 
-const timestamp = fs.statSync(__filename).mtimeMs;
+const timestamp = stamp.get(1);
 
 const fileWalker = obj => {
     const _path = obj.entry;
@@ -40,7 +41,6 @@ const fileWalker = obj => {
 }
 
 module.exports = obj => {
-    const self = fs.readFileSync(__filename);
-    fs.writeFileSync(__filename, self);
+    stamp.set(1);
     return fileWalker(obj);
 }

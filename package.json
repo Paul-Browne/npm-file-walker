@@ -1,6 +1,6 @@
 {
   "name": "recursive-file-walker",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "recursively look over all the files and sub directories from a starting directory",
   "main": "index.js",
   "scripts": {

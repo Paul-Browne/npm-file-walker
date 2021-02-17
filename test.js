@@ -2,7 +2,7 @@ const fileWalker = require("./index.js");
 
 fileWalker({
 	entry: "test",
-	readFiles: true,
+	readFiles: "modified",
 	onDirectory: response => {
 		// console.log(response);
 	},

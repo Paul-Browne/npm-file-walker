@@ -31,11 +31,13 @@ const fileWalker = obj => {
             return fileWalker(obj);
         })
     } else {
+        const modified = (details.mtimeMs > timestamp || details.ctimeMs > timestamp);
+        const readFilesBool = (obj.readFiles === true || (obj.readFiles === "modified" && modified));
         obj.onFile && obj.onFile({
             stats: details,
             path: _path,
-            contents: obj.readFiles && fs.readFileSync(_path),
-            modified: (details.mtimeMs > timestamp || details.ctimeMs > timestamp)
+            contents: readFilesBool && fs.readFileSync(_path),
+            modified: modified
         });
     }
 }

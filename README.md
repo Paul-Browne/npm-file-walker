@@ -15,13 +15,14 @@ const fileWalker = require("recursive-file-walker");
 
 fileWalker({
   entry: "path/to/start/directory",
-  readFiles: true,          // fs.readFileSync the files. default: false
+  readFiles: true,              // fs.readFileSync the files. default:false
+  // readFile: "modified" will only read the file if the contents have been changed
   onDirectory: response => {
     console.log(response);      // callback when directory, object passed with directory details 
   },
   onFile: response => {
     console.log(response);      // callback when file, object passed with file details
-  }                             // will inc. contents if readFile: true
+  }                             // will inc. contents if readFile:true or if readFile:"modified" and contents have changed
 });
 ```
 

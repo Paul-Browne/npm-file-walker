@@ -1,6 +1,6 @@
 {
   "name": "recursive-file-walker",
-  "version": "1.0.3",
+  "version": "1.0.7",
   "description": "recursively look over all the files and sub directories from a starting directory",
   "main": "index.js",
   "scripts": {
@@ -24,6 +24,6 @@
   },
   "homepage": "https://github.com/Paul-Browne/npm-file-walker#readme",
   "dependencies": {
-    "stamptime": "^1.0.3"
+    "stamptime": "^1.0.7"
   }
 }

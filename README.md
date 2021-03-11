@@ -14,16 +14,22 @@ or
 const fileWalker = require("recursive-file-walker");
 
 fileWalker({
+  id: 123                       // pass an id, if you are using more than one fileWalker function (optional)
   entry: "path/to/start/directory",
+  ignoreDotFiles: true          // will ignore dotfiles, default:false
+  sort: "asc"      // or desc   // will sort the files by depth from root directory, only for the onFinish callback, default:"asc"
   readFiles: true,              // fs.readFileSync the files. default:false
-  // readFile: "modified" will only read the file if the contents have been changed
+                                // readFile: "modified" will only read the file if the contents have been changed
   onDirectory: response => {
     console.log(response);      // callback when directory, object passed with directory details 
   },
   onFile: response => {
     console.log(response);      // callback when file, object passed with file details
+  },                            // will inc. contents if readFile:true or if readFile:"modified" and contents have changed
+  onFinish: response => {
+    console.log(response);      // callback when finished, array passed with all file and directory details
   }                             // will inc. contents if readFile:true or if readFile:"modified" and contents have changed
-});
+});                             // will also sort by depth ascending (root first)
 ```
 
 example response for directory
@@ -51,36 +57,48 @@ example response for directory
     birthtime: 2021-02-15T23:16:21.511Z
   },
   path: 'test',
+  name: 'test',
+  depth: 0,
   contents: [
     {
       path: 'test/bar',
+      name: 'bar',
       stats: [Stats],
       isFile: false,
-      isDirectory: true
+      isDirectory: true,
+      depth: 1
     },
     {
       path: 'test/foo',
+      name: 'foo',
       stats: [Stats],
       isFile: false,
-      isDirectory: true
+      isDirectory: true,
+      depth: 1
     },
     {
       path: 'test/index.html',
+      name: 'index.html',
       stats: [Stats],
       isFile: true,
-      isDirectory: false
+      isDirectory: false,
+      depth: 1
     },
     {
       path: 'test/index.js',
+      name: 'index.js',
       stats: [Stats],
       isFile: true,
-      isDirectory: false
+      isDirectory: false,
+      depth: 1
     },
     {
       path: 'test/index.txt',
+      name: 'index.txt',
       stats: [Stats],
       isFile: true,
-      isDirectory: false
+      isDirectory: false,
+      depth: 1
     }
   ]
 }
@@ -113,6 +131,8 @@ example response for a file. `contents` will be undefined if `readFile: false`.
     birthtime: 2021-02-15T23:18:48.666Z
   },
   path: 'test/index.txt',
+  name: 'index.txt',
+  depth: 1,  
   contents: <Buffer 4c 6f 72 65 6d 20 69 70 73 75 6d 20 64 6f 6c 6f 72 20 73 69 74 20 61 6d 65 74 2c 20 63 6f 6e 73 65 63 74 65 74 75 72 20 61 64 69 70 69 73 69 63 69 6e ... 4214650 more bytes>,
   modified: true
 }

@@ -17,6 +17,7 @@ fileWalker({
   id: 123                       // pass an id, if you are using more than one fileWalker function (optional)
   entry: "path/to/start/directory",
   ignoreDotFiles: true          // will ignore dotfiles, default:false
+  ignodeDir: "foo" // ["foo", "bar"]   // will ignore a directory, or array of directories
   sort: "asc"      // or desc   // will sort the files by depth from root directory, only for the onFinish callback, default:"asc"
   readFiles: true,              // fs.readFileSync the files. default:false
                                 // readFile: "modified" will only read the file if the contents have been changed

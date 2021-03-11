@@ -2,6 +2,7 @@ const fileWalker = require("./index.js");
 
 fileWalker({
 	id: 123,
+	ignoreDir: ["bar", "foo"],
 	ignoreDotFiles: true,
 	sort: "asc",	// desc
 	entry: "test",

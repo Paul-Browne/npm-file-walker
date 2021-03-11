@@ -6,54 +6,70 @@ const fileWalker = (obj, store, depth) => {
     const timestamp = stamp.get(obj.id || 1);
     const _path = obj.entry;
     const details = fs.statSync(_path);
-    if (details.isDirectory()) {
-        const dir = fs.readdirSync(_path).sort(a => {
-            const subPath = path.join(_path, a);
-            return fs.statSync(subPath).isDirectory();
-        });
-        const contents = dir.map(subs => {
-            const subPath = path.join(_path, subs);
-            const subStat = fs.statSync(subPath);
-            const isFile = subStat.isFile();
-            return {
-                path: subPath,
-                name: subs,
-                stats: subStat,
-                isFile: isFile,
-                isDirectory: subStat.isDirectory(),
-                depth: depth + 1
-            }
-        })
-        const dirDetails = {
-            stats: details,
-            path: _path,
-            name: path.basename(_path),
-            contents: contents,
-            depth: depth
-        };
-        store.push(dirDetails);
-        obj.onDirectory && obj.onDirectory(dirDetails);
-        depth++;
-        dir.map(subs => {
-            obj.entry = path.join(_path, subs);
-            return fileWalker(obj, store, depth);
-        })
-    } else {
-        const modified = (details.mtimeMs > timestamp || details.ctimeMs > timestamp);
-        const readFilesBool = (obj.readFiles === true || (obj.readFiles === "modified" && modified));
-        const fileName = path.basename(_path);
-        const isDotFile = fileName.indexOf(".") === 0;
-        if(!(obj.ignoreDotFiles && isDotFile)){
-            const fileDetails = {
+    let ignoreDir = false;
+    if(obj.ignoreDir){
+        if(typeof obj.ignoreDir === 'string'){
+            ignoreDir = _path.indexOf(obj.ignoreDir) >= 0;
+        }else{
+            ignoreDir = obj.ignoreDir.some( element => {
+                return _path.indexOf(element) >= 0;
+            });
+        }
+    }
+    if(!ignoreDir){
+        if (details.isDirectory()) {
+            const dir = fs.readdirSync(_path).sort(a => {
+                const subPath = path.join(_path, a);
+                return fs.statSync(subPath).isDirectory();
+            });
+            const contents = dir.map(subs => {
+                const subPath = path.join(_path, subs);
+                const subStat = fs.statSync(subPath);
+                const isFile = subStat.isFile();
+                return {
+                    path: subPath,
+                    name: subs,
+                    stats: subStat,
+                    isFile: isFile,
+                    isDirectory: subStat.isDirectory(),
+                    depth: depth + 1
+                }
+            })
+            const dirDetails = {
                 stats: details,
                 path: _path,
-                name: fileName,
-                contents: readFilesBool && fs.readFileSync(_path),
-                modified: modified,
+                name: path.basename(_path),
+                isFile: false,
+                isDirectory: true,            
+                contents: contents,
                 depth: depth
             };
-            store.push(fileDetails);
-            obj.onFile && obj.onFile(fileDetails);
+            store.push(dirDetails);
+            obj.onDirectory && obj.onDirectory(dirDetails);
+            depth++;
+            dir.map(subs => {
+                obj.entry = path.join(_path, subs);
+                return fileWalker(obj, store, depth);
+            })
+        } else {
+            const modified = (details.mtimeMs > timestamp || details.ctimeMs > timestamp);
+            const readFilesBool = (obj.readFiles === true || (obj.readFiles === "modified" && modified));
+            const fileName = path.basename(_path);
+            const isDotFile = fileName.indexOf(".") === 0;
+            if(!(obj.ignoreDotFiles && isDotFile)){
+                const fileDetails = {
+                    stats: details,
+                    path: _path,
+                    name: fileName,
+                    isFile: true,
+                    isDirectory: false,
+                    contents: readFilesBool && fs.readFileSync(_path),
+                    modified: modified,
+                    depth: depth
+                };
+                store.push(fileDetails);
+                obj.onFile && obj.onFile(fileDetails);
+            }
         }
     }
 }

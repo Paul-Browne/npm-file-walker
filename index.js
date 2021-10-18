@@ -1,44 +1,48 @@
-const fs = require("fs");
-const path = require("path");
-const stamp = require("stamptime");
+import { readdir, readFile, stat } from "fs/promises";
+import { join, basename } from "path";
+import { get, set } from "stamptime";
 
-const fileWalker = (obj, store, depth) => {
-    const timestamp = stamp.get(obj.id || 1);
-    const _path = obj.entry;
-    const details = fs.statSync(_path);
+const fileWalker = async (obj, store, depth) => {
+    const path = obj.entry;
+    let timestamp;
+    try {
+        timestamp = await get(obj.id || 1);
+    } catch (error) {
+        set(obj.id || 1);
+    }
+    const details = await stat(path);
     let ignoreDir = false;
     if(obj.ignoreDir){
         if(typeof obj.ignoreDir === 'string'){
-            ignoreDir = _path.indexOf(obj.ignoreDir) >= 0;
+            ignoreDir = path.indexOf(obj.ignoreDir) >= 0;
         }else{
-            ignoreDir = obj.ignoreDir.some( element => {
-                return _path.indexOf(element) >= 0;
-            });
+            ignoreDir = obj.ignoreDir.some(element => path.indexOf(element) >= 0);
         }
     }
     if(!ignoreDir){
         if (details.isDirectory()) {
-            const dir = fs.readdirSync(_path).sort(a => {
-                const subPath = path.join(_path, a);
-                return fs.statSync(subPath).isDirectory();
+            const dir = await readdir(path);
+            dir.sort(async a => {
+                const x = await stat(join(path, a));
+                return x.isDirectory();
             });
-            const contents = dir.map(subs => {
-                const subPath = path.join(_path, subs);
-                const subStat = fs.statSync(subPath);
+            const contents = await Promise.all(dir.map(async subs => {
+                const subPath = join(path, subs);
+                const subStat = await stat(subPath);
                 const isFile = subStat.isFile();
-                return {
+                return{
                     path: subPath,
                     name: subs,
                     stats: subStat,
                     isFile: isFile,
                     isDirectory: subStat.isDirectory(),
                     depth: depth + 1
-                }
-            })
+                };
+            }))
             const dirDetails = {
                 stats: details,
-                path: _path,
-                name: path.basename(_path),
+                path: path,
+                name: basename(path),
                 isFile: false,
                 isDirectory: true,            
                 contents: contents,
@@ -47,23 +51,24 @@ const fileWalker = (obj, store, depth) => {
             store.push(dirDetails);
             obj.onDirectory && obj.onDirectory(dirDetails);
             depth++;
-            dir.map(subs => {
-                obj.entry = path.join(_path, subs);
-                return fileWalker(obj, store, depth);
-            })
+            await Promise.all(dir.map(async subs => {
+                obj.entry = join(path, subs);
+                return await fileWalker(obj, store, depth);
+            }))
         } else {
-            const modified = (details.mtimeMs > timestamp || details.ctimeMs > timestamp);
+            const modified = !timestamp || (details.mtimeMs > timestamp || details.ctimeMs > timestamp);
             const readFilesBool = (obj.readFiles === true || (obj.readFiles === "modified" && modified));
-            const fileName = path.basename(_path);
+            const fileName = basename(path);
             const isDotFile = fileName.indexOf(".") === 0;
             if(!(obj.ignoreDotFiles && isDotFile)){
+                const contents = await readFile(path);
                 const fileDetails = {
                     stats: details,
-                    path: _path,
+                    path: path,
                     name: fileName,
                     isFile: true,
                     isDirectory: false,
-                    contents: readFilesBool && fs.readFileSync(_path),
+                    contents: readFilesBool && contents,
                     modified: modified,
                     depth: depth
                 };
@@ -74,15 +79,11 @@ const fileWalker = (obj, store, depth) => {
     }
 }
 
-module.exports = obj => {
+export default async obj => {
     const store = [];
-    const res = fileWalker(obj, store, 0);
+    await fileWalker(obj, store, 0);
     if(obj.onFinish){
-        store.sort((a,b) => {
-            return obj.sort && obj.sort === "desc" ? b.depth - a.depth : a.depth - b.depth;
-        })
+        store.sort((a,b) => obj.sort && obj.sort === "desc" ? b.depth - a.depth : a.depth - b.depth);
         obj.onFinish(store);
-    }    
-    stamp.set(obj.id || 1);
-    return res
+    }
 }

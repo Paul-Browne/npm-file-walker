@@ -1,21 +1,25 @@
-const fileWalker = require("./index.js");
+import fileWalker from "./index.js";
 
 fileWalker({
-	id: 123,
+	id: 789,
 	ignoreDir: ["bar", "foo"],
 	ignoreDotFiles: true,
 	sort: "asc",	// desc
 	entry: "test",
 	readFiles: "modified",
 	onDirectory: response => {
-		//console.log("dir:", response.path);
+		console.log("onDirectory")
+		console.log("===========")
+		console.log(response);
 	},
 	onFile: response => {
-		//console.log("file:", response.path);
+		console.log("onFile")
+		console.log("======")		
+		console.log(response);
 	},
 	onFinish: response => {
+		console.log("onFinish")
+		console.log("========")			
 		console.log(response);
 	}
 });
-
-

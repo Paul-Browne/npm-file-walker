@@ -11,26 +11,25 @@ or
 
 
 ```js
-const fileWalker = require("recursive-file-walker");
+import fileWalker from "recursive-file-walker";
 
 fileWalker({
-  id: 123                       // pass an id, if you are using more than one fileWalker function (optional)
-  entry: "path/to/start/directory",
-  ignoreDotFiles: true          // will ignore dotfiles, default:false
-  ignodeDir: "foo" // ["foo", "bar"]   // will ignore a directory, or array of directories
-  sort: "asc"      // or desc   // will sort the files by depth from root directory, only for the onFinish callback, default:"asc"
-  readFiles: true,              // fs.readFileSync the files. default:false
-                                // readFile: "modified" will only read the file if the contents have been changed
-  onDirectory: response => {
-    console.log(response);      // callback when directory, object passed with directory details 
-  },
-  onFile: response => {
-    console.log(response);      // callback when file, object passed with file details
-  },                            // will inc. contents if readFile:true or if readFile:"modified" and contents have changed
-  onFinish: response => {
-    console.log(response);      // callback when finished, array passed with all file and directory details
-  }                             // will inc. contents if readFile:true or if readFile:"modified" and contents have changed
-});                             // will also sort by depth ascending (root first)
+	id: 789,                           // pass an id, if you are using more than one fileWalker function (optional)
+  entry: "path/to/start/directory",  // where to start the recursive file walker
+	ignoreDir: ["bar", "foo"],         // will ignore a directory (string), or array of directories
+	ignoreDotFiles: true,              // will ignore dotfiles, default:false
+	sort: "asc",                       // will sort the files by depth from root directory, only for the onFinish callback, default:"asc"
+	readFiles: "modified",             // "true" - all files, "false" - no files, "modified" will only read the file if the contents have been changed, default:false
+	onDirectory: response => {
+		console.log(response);           // callback when directory, object passed with directory details 
+	},
+	onFile: response => {
+		console.log(response);           // callback when file, object passed with file details 
+	},                                 // will inc. contents if readFile:true or if readFile:"modified" and contents have changed
+	onFinish: response => {
+		console.log(response);           // callback when finished, array passed with all file and directory details
+	}                                  // will inc. contents if readFile:true or if readFile:"modified" and contents have changed
+});                                  // will also sort by depth ascending (root first)
 ```
 
 example response for directory

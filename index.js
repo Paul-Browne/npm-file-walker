@@ -2,15 +2,8 @@ import { readdir, readFile, stat } from "fs/promises";
 import { join, basename } from "path";
 import { get, set } from "stamptime";
 
-const fileWalker = async (obj, store, depth) => {
+const fileWalker = async (obj, store, depth, timestamp) => {
     const path = obj.entry;
-    let timestamp;
-    try {
-        timestamp = await get(obj.id || 1);
-    } catch (error) {
-        set(obj.id || 1);
-    }
-    const details = await stat(path);
     let ignoreDir = false;
     if(obj.ignoreDir){
         if(typeof obj.ignoreDir === 'string'){
@@ -20,11 +13,11 @@ const fileWalker = async (obj, store, depth) => {
         }
     }
     if(!ignoreDir){
+        const details = await stat(path);
         if (details.isDirectory()) {
             const dir = await readdir(path);
             dir.sort(async a => {
-                const x = await stat(join(path, a));
-                return x.isDirectory();
+                return (await stat(join(path, a))).isDirectory();
             });
             const contents = await Promise.all(dir.map(async subs => {
                 const subPath = join(path, subs);
@@ -53,10 +46,10 @@ const fileWalker = async (obj, store, depth) => {
             depth++;
             await Promise.all(dir.map(async subs => {
                 obj.entry = join(path, subs);
-                return await fileWalker(obj, store, depth);
+                return await fileWalker(obj, store, depth, timestamp);
             }))
         } else {
-            const modified = !timestamp || (details.mtimeMs > timestamp || details.ctimeMs > timestamp);
+            const modified = (details.mtimeMs > timestamp || details.ctimeMs > timestamp);
             const readFilesBool = (obj.readFiles === true || (obj.readFiles === "modified" && modified));
             const fileName = basename(path);
             const isDotFile = fileName.indexOf(".") === 0;
@@ -81,9 +74,12 @@ const fileWalker = async (obj, store, depth) => {
 
 export default async obj => {
     const store = [];
-    await fileWalker(obj, store, 0);
+    const timestamp = await get(obj.id || 1);
+    await fileWalker(obj, store, 0, timestamp);
     if(obj.onFinish){
         store.sort((a,b) => obj.sort && obj.sort === "desc" ? b.depth - a.depth : a.depth - b.depth);
         obj.onFinish(store);
     }
+    await set(obj.id || 1);
+    return store;
 }

@@ -13,7 +13,7 @@ or
 ```js
 import fileWalker from "recursive-file-walker";
 
-fileWalker({
+const response = await fileWalker({
 	id: 789,                           // pass an id, if you are using more than one fileWalker function (optional)
   entry: "path/to/start/directory",  // where to start the recursive file walker
 	ignoreDir: ["bar", "foo"],         // will ignore a directory (string), or array of directories
@@ -30,6 +30,8 @@ fileWalker({
 		console.log(response);           // callback when finished, array passed with all file and directory details
 	}                                  // will inc. contents if readFile:true or if readFile:"modified" and contents have changed
 });                                  // will also sort by depth ascending (root first)
+
+console.log(response);               // sames as onFinish response
 ```
 
 example response for directory

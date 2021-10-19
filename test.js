@@ -1,8 +1,8 @@
 import fileWalker from "./index.js";
 
-fileWalker({
-	id: 789,
-	ignoreDir: ["bar", "foo"],
+const res = await fileWalker({
+	id: "xyz",
+	//ignoreDir: ["bar", "foo"],
 	ignoreDotFiles: true,
 	sort: "asc",	// desc
 	entry: "test",
@@ -17,9 +17,11 @@ fileWalker({
 		console.log("======")		
 		console.log(response);
 	},
-	onFinish: response => {
-		console.log("onFinish")
-		console.log("========")			
-		console.log(response);
-	}
+	// onFinish: response => {
+	// 	console.log("onFinish")
+	// 	console.log("========")			
+	// 	console.log(response);
+	// }
 });
+
+console.log(res);

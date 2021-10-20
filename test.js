@@ -8,7 +8,7 @@ const res = await fileWalker({
 	ignoreDotFiles: true,			
 	ignoreDotDirectories: true,			// TODO
 	readFiles: "modified",
-	flattern: false,
+	flatten: false,
 	sort: "asc"							// TODO
 });
 

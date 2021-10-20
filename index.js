@@ -61,7 +61,7 @@ export default async obj => {
     const timestamp = await get(obj.id || 1);
     const FW = await fileWalker(obj, -1, timestamp);
     await set(obj.id || 1);
-    if(obj.flattern){
+    if(obj.flatten){
         const store = [];
         rec(FW, store);
         if(obj.sort){

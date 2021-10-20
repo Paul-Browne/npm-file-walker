@@ -21,7 +21,7 @@ const response = await fileWalker({
 	ignoreDotFiles: true,              // will ignore dotfiles, default:true
   ignoreDotDirectories: true,        // TODO will ignore dotDirectories, default:true 
 	readFiles: "modified",             // "true" - all files, "false" - no files, "modified" will only read the file if the contents have been changed, default:false
-  flattern: false                    // if true, will flattern the response
+  flatten: false                    // if true, will flatten the response
   sort: "asc"                        // TODO - sort by depth if flat asc or desc
 });
 

@@ -1,4 +1,4 @@
-import fileWalker from "./index.js";
+import fileWalker, {reset} from "./index.js";
 
 const res = await fileWalker({
 	entry: "test",
@@ -13,3 +13,5 @@ const res = await fileWalker({
 });
 
 console.log(res);
+
+Math.random() > 0.5 && reset("xyz123");

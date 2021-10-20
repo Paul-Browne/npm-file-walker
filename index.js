@@ -1,6 +1,6 @@
 import { readdir, readFile, stat } from "fs/promises";
 import { join, basename } from "path";
-import { get, set } from "stamptime";
+import { get, set, reset as resetStamptime } from "stamptime";
 
 const fileWalker = async (obj, depth, timestamp) => {
     const path = obj.entry;
@@ -57,15 +57,17 @@ const rec = (element, store) => {
     }
 }
 
+export const reset = (id) => resetStamptime(id);
+
 export default async obj => {
     const validId = (obj.id && typeof obj.id === 'string' && obj.id.length > 5);
     if(!obj.entry){
         console.error("an entry directory must be specified");
         return
     }else if(validId){
-        const timestamp = await get(obj.id || "xyz123");
+        const timestamp = await get(obj.id);
         const FW = await fileWalker(obj, -1, timestamp);
-        await set(obj.id || "xyz123");
+        await set(obj.id);
         if(obj.flatten){
             const store = [];
             rec(FW, store);

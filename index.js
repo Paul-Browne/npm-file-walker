@@ -58,17 +58,25 @@ const rec = (element, store) => {
 }
 
 export default async obj => {
-    const timestamp = await get(obj.id || 1);
-    const FW = await fileWalker(obj, -1, timestamp);
-    await set(obj.id || 1);
-    if(obj.flatten){
-        const store = [];
-        rec(FW, store);
-        if(obj.sort){
-            // TODO
+    const validId = (obj.id && typeof obj.id === 'string' && obj.id.length > 5);
+    if(!obj.entry){
+        console.error("an entry directory must be specified");
+        return
+    }else if(validId){
+        const timestamp = await get(obj.id || "xyz123");
+        const FW = await fileWalker(obj, -1, timestamp);
+        await set(obj.id || "xyz123");
+        if(obj.flatten){
+            const store = [];
+            rec(FW, store);
+            if(obj.sort){
+                // TODO
+            }
+            return store;
+        }else{
+            return FW;
         }
-        return store;
-    }else{
-        return FW;
-    }
+	}else{
+		console.error("id must be a string of at least 6 characters");
+	}    
 }

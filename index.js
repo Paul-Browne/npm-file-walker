@@ -2,51 +2,27 @@ import { readdir, readFile, stat } from "fs/promises";
 import { join, basename } from "path";
 import { get, set } from "stamptime";
 
-const fileWalker = async (obj, store, depth, timestamp) => {
+const fileWalker = async (obj, depth, timestamp) => {
     const path = obj.entry;
-    let ignoreDir = false;
-    if(obj.ignoreDir){
-        if(typeof obj.ignoreDir === 'string'){
-            ignoreDir = path.indexOf(obj.ignoreDir) >= 0;
+    let ignoreDirectory = false;
+    if(obj.ignoreDirectories){
+        if(typeof obj.ignoreDirectories === 'string'){
+            ignoreDirectory = path.indexOf(obj.ignoreDirectories) >= 0;
         }else{
-            ignoreDir = obj.ignoreDir.some(element => path.indexOf(element) >= 0);
+            // currently ignores all dir's that contain eg. "bar"
+            ignoreDirectory = obj.ignoreDirectories.some(element => path.indexOf(element) >= 0);
         }
     }
-    if(!ignoreDir){
+    if(ignoreDirectory){
+        return [];
+    }else{
         const details = await stat(path);
         if (details.isDirectory()) {
             const dir = await readdir(path);
-            dir.sort(async a => {
-                return (await stat(join(path, a))).isDirectory();
-            });
-            const contents = await Promise.all(dir.map(async subs => {
-                const subPath = join(path, subs);
-                const subStat = await stat(subPath);
-                const isFile = subStat.isFile();
-                return{
-                    path: subPath,
-                    name: subs,
-                    stats: subStat,
-                    isFile: isFile,
-                    isDirectory: subStat.isDirectory(),
-                    depth: depth + 1
-                };
-            }))
-            const dirDetails = {
-                stats: details,
-                path: path,
-                name: basename(path),
-                isFile: false,
-                isDirectory: true,            
-                contents: contents,
-                depth: depth
-            };
-            store.push(dirDetails);
-            obj.onDirectory && obj.onDirectory(dirDetails);
-            depth++;
-            await Promise.all(dir.map(async subs => {
+            depth = depth + 1;
+            return await Promise.all(dir.map(async subs => {
                 obj.entry = join(path, subs);
-                return await fileWalker(obj, store, depth, timestamp);
+                return await fileWalker(obj, depth, timestamp);
             }))
         } else {
             const modified = (details.mtimeMs > timestamp || details.ctimeMs > timestamp);
@@ -65,21 +41,34 @@ const fileWalker = async (obj, store, depth, timestamp) => {
                     modified: modified,
                     depth: depth
                 };
-                store.push(fileDetails);
-                obj.onFile && obj.onFile(fileDetails);
+                return fileDetails;
+            }else{
+                return {};
             }
         }
     }
 }
 
-export default async obj => {
-    const store = [];
-    const timestamp = await get(obj.id || 1);
-    await fileWalker(obj, store, 0, timestamp);
-    if(obj.onFinish){
-        store.sort((a,b) => obj.sort && obj.sort === "desc" ? b.depth - a.depth : a.depth - b.depth);
-        obj.onFinish(store);
+const rec = (element, store) => {
+    if(Array.isArray(element)){
+        element.forEach(ele => rec(ele, store));
+    }else{
+        store.push(element);
     }
+}
+
+export default async obj => {
+    const timestamp = await get(obj.id || 1);
+    const FW = await fileWalker(obj, -1, timestamp);
     await set(obj.id || 1);
-    return store;
+    if(obj.flattern){
+        const store = [];
+        rec(FW, store);
+        if(obj.sort){
+            // TODO
+        }
+        return store;
+    }else{
+        return FW;
+    }
 }

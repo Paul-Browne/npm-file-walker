@@ -57,7 +57,7 @@ const rec = (element, store) => {
     }
 }
 
-export const reset = (id) => resetStamptime(id);
+export const reset = async (id) => await resetStamptime(id);
 
 export default async obj => {
     const validId = (obj.id && typeof obj.id === 'string' && obj.id.length > 5);

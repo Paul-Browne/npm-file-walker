@@ -14,4 +14,4 @@ const res = await fileWalker({
 
 console.log(res);
 
-Math.random() > 0.5 && reset("xyz123");
+Math.random() > 0.5 && await reset("xyz123");

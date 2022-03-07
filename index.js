@@ -5,17 +5,17 @@ import { get, set, reset as resetStamptime } from "stamptime";
 const fileWalker = async (obj, depth, timestamp) => {
     const path = obj.entry;
     let ignoreDirectory = false;
-    if(obj.ignoreDirectories){
-        if(typeof obj.ignoreDirectories === 'string'){
+    if (obj.ignoreDirectories) {
+        if (typeof obj.ignoreDirectories === 'string') {
             ignoreDirectory = path.indexOf(obj.ignoreDirectories) >= 0;
-        }else{
+        } else {
             // currently ignores all dir's that contain eg. "bar"
             ignoreDirectory = obj.ignoreDirectories.some(element => path.indexOf(element) >= 0);
         }
     }
-    if(ignoreDirectory){
+    if (ignoreDirectory) {
         return [];
-    }else{
+    } else {
         const details = await stat(path);
         if (details.isDirectory()) {
             const dir = await readdir(path);
@@ -29,7 +29,7 @@ const fileWalker = async (obj, depth, timestamp) => {
             const readFilesBool = (obj.readFiles === true || (obj.readFiles === "modified" && modified));
             const fileName = basename(path);
             const isDotFile = fileName.indexOf(".") === 0;
-            if(!(obj.ignoreDotFiles && isDotFile)){
+            if (!(obj.ignoreDotFiles && isDotFile)) {
                 const contents = await readFile(path);
                 const fileDetails = {
                     stats: details,
@@ -42,7 +42,7 @@ const fileWalker = async (obj, depth, timestamp) => {
                     depth: depth
                 };
                 return fileDetails;
-            }else{
+            } else {
                 return {};
             }
         }
@@ -50,9 +50,9 @@ const fileWalker = async (obj, depth, timestamp) => {
 }
 
 const rec = (element, store) => {
-    if(Array.isArray(element)){
+    if (Array.isArray(element)) {
         element.forEach(ele => rec(ele, store));
-    }else{
+    } else {
         store.push(element);
     }
 }
@@ -60,25 +60,24 @@ const rec = (element, store) => {
 export const reset = async (id) => await resetStamptime(id);
 
 export default async obj => {
-    const validId = (obj.id && typeof obj.id === 'string' && obj.id.length > 5);
-    if(!obj.entry){
+    if (!obj.entry) {
         console.error("an entry directory must be specified");
         return
-    }else if(validId){
+    } else if (typeof obj.id !== 'undefined') {
         const timestamp = await get(obj.id);
         const FW = await fileWalker(obj, -1, timestamp);
         await set(obj.id);
-        if(obj.flatten){
+        if (obj.flatten) {
             const store = [];
             rec(FW, store);
-            if(obj.sort){
+            if (obj.sort) {
                 // TODO
             }
             return store;
-        }else{
+        } else {
             return FW;
         }
-	}else{
-		console.error("id must be a string of at least 6 characters");
-	}    
+    } else {
+        console.error("id cannot be undefined");
+    }
 }
